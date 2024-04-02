@@ -17,11 +17,6 @@ urlpatterns = [
         name="pickup-line-list-create",
     ),
     path(
-        "pickup-lines-ratings/",
-        views.PickupLineWithRatingsListView.as_view(),
-        name="pickup-line-with-ratings-list-create",
-    ),
-    path(
         "ratings/<int:pk>/", views.RatingListCreate.as_view(), name="rating-list-create"
     ),
     path(
@@ -30,3 +25,9 @@ urlpatterns = [
         name="pickup-line-rate",
     ),
 ]
+
+#    path(
+#         "pickup-lines-ratings/",
+#         views.PickupLineWithRatingsListView.as_view(),
+#         name="pickup-line-with-ratings-list-create",
+#     ),
