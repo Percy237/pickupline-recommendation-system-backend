@@ -10,7 +10,6 @@ from .serializers import (
     CategorySerializer,
     PickupLineSerializer,
     RatingSerializer,
-    PickupLineWithRatingSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import UserCategory, Category, PickupLine, Rating
@@ -77,7 +76,7 @@ class RatingUpdate(generics.UpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         return Rating.objects.filter(user=user)
-    
+
     def perform_update(self, serializer):
         serializer.save(user=self.request.user)
 
