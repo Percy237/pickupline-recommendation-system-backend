@@ -1,8 +1,6 @@
 from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from django.contrib.auth.models import User
+from rest_framework.exceptions import ValidationError
 from rest_framework import generics
 from .serializers import (
     UserSerializer,
@@ -63,10 +61,15 @@ class RatingListCreate(generics.ListCreateAPIView):
         return Rating.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        if serializer.is_valid():
-            serializer.save(user=self.request.user)
-        else:
-            print(serializer.errors)
+        user = self.request.user
+        pickup_line_id = serializer.validated_data["pickup_line"]
+        existing_rating = Rating.objects.filter(
+            user=user, pickup_line_id=pickup_line_id
+        ).exists()
+        if existing_rating:
+            # User has already rated this pickup line, return a 403 response
+            raise ValidationError("You have already rated this pickup line.")
+        serializer.save(user=user)
 
 
 class RatingUpdate(generics.UpdateAPIView):

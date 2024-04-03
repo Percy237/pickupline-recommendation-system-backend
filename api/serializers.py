@@ -42,7 +42,7 @@ class PickupLineSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = ["id", "user", "pickup_line", "rating"]
+        fields = ["id", "pickup_line", "rating"]
 
 
 # class PickupLineWithRatingSerializer(serializers.ModelSerializer):

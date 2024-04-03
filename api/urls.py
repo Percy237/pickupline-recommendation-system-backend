@@ -16,9 +16,7 @@ urlpatterns = [
         views.PickupLineListCreate.as_view(),
         name="pickup-line-list-create",
     ),
-    path(
-        "ratings/<int:pk>/", views.RatingListCreate.as_view(), name="rating-list-create"
-    ),
+    path("ratings/", views.RatingListCreate.as_view(), name="rating-list-create"),
     path(
         "pickup-lines/<int:pk>/rate/",
         views.RatingUpdate.as_view(),
