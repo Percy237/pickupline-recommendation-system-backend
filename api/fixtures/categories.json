@@ -1,0 +1,51 @@
+[
+  {
+    "model": "api.category",
+    "pk": 1,
+    "fields": {
+      "category_name": "Flirty"
+    }
+  },
+  {
+    "model": "api.category",
+    "pk": 2,
+    "fields": {
+      "category_name": "Clever"
+    }
+  },
+  {
+    "model": "api.category",
+    "pk": 3,
+    "fields": {
+      "category_name": "Complimentary"
+    }
+  },
+  {
+    "model": "api.category",
+    "pk": 4,
+    "fields": {
+      "category_name": "Romantic"
+    }
+  },
+  {
+    "model": "api.category",
+    "pk": 5,
+    "fields": {
+      "category_name": "Funny"
+    }
+  },
+  {
+    "model": "api.category",
+    "pk": 6,
+    "fields": {
+      "category_name": "Cheesy"
+    }
+  },
+  {
+    "model": "api.category",
+    "pk": 7,
+    "fields": {
+      "category_name": "Religious"
+    }
+  }
+]

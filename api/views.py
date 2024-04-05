@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from random import shuffle
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -99,5 +100,6 @@ class PickupLineListWithRatings(APIView):
             pickup_line_data = PickupLineSerializer(pickup_line).data
             pickup_line_data["ratings"] = serialized_ratings
             serialized_pickup_lines.append(pickup_line_data)
+            shuffle(serialized_pickup_lines)
 
         return Response(serialized_pickup_lines, status=status.HTTP_200_OK)
