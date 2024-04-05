@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from rest_framework.exceptions import ValidationError
-from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import generics, status
 from .serializers import (
     UserSerializer,
     UserCategorySerializer,
@@ -63,42 +64,40 @@ class RatingListCreate(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         user = self.request.user
         pickup_line_id = serializer.validated_data["pickup_line"]
+        rating_value = serializer.validated_data["rating"]
+        print(rating_value)
         existing_rating = Rating.objects.filter(
             user=user, pickup_line_id=pickup_line_id
-        ).exists()
+        ).first()
+        print(existing_rating)
         if existing_rating:
+            existing_rating.rating = rating_value
+            existing_rating.save()
+            serializer = RatingSerializer(existing_rating)
             # User has already rated this pickup line, return a 403 response
-            raise ValidationError("You have already rated this pickup line.")
-        serializer.save(user=user)
+        else:
+            serializer = RatingSerializer(data=self.request.data)
+            if serializer.is_valid():  # Check if the serializer is valid
+                serializer.save(user=user)
+            else:
+                # Handle the case where serializer is not valid
+                # You can return an error response or perform other actions
+                print("Serializer is not valid:", serializer.errors)
 
 
-class RatingUpdate(generics.UpdateAPIView):
-    serializer_class = RatingSerializer
-    permission_classes = [IsAuthenticated]
+class PickupLineListWithRatings(APIView):
+    def get(self, request):
+        user = request.user
+        pickup_lines = PickupLine.objects.all()
+        serialized_pickup_lines = []
 
-    def get_queryset(self):
-        user = self.request.user
-        return Rating.objects.filter(user=user)
+        for pickup_line in pickup_lines:
+            ratings = Rating.objects.filter(user=user, pickup_line=pickup_line)
+            serialized_ratings = [
+                rating.rating for rating in ratings
+            ]  # Extracting only rating values
+            pickup_line_data = PickupLineSerializer(pickup_line).data
+            pickup_line_data["ratings"] = serialized_ratings
+            serialized_pickup_lines.append(pickup_line_data)
 
-    def perform_update(self, serializer):
-        serializer.save(user=self.request.user)
-
-    # def perform_update(self, serializer):
-    #     user = self.request.user
-    #     pickup_line_id = self.kwargs.get("pk")
-    #     rating_value = self.request.data.get("rating")
-
-    #     # Get or create the rating object
-    #     rating, created = Rating.objects.get_or_create(
-    #         user=user, pickup_line_id=pickup_line_id
-    #     )
-
-    #     # Update the rating value
-    #     rating.rating = rating_value
-    #     rating.save()
-
-
-# class PickupLineWithRatingsListView(generics.ListAPIView):
-#     queryset = PickupLine.objects.all()
-#     serializer_class = PickupLineWithRatingSerializer
-#     permission_classes = [IsAuthenticated]
+        return Response(serialized_pickup_lines, status=status.HTTP_200_OK)

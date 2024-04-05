@@ -45,20 +45,20 @@ class RatingSerializer(serializers.ModelSerializer):
         fields = ["id", "pickup_line", "rating"]
 
 
-# class PickupLineWithRatingSerializer(serializers.ModelSerializer):
-#     rating = serializers.SerializerMethodField()
-#     category_name = serializers.CharField(
-#         source="category.category_name", read_only=True
-#     )
+class PickupLineWithRatingSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+    category_name = serializers.CharField(
+        source="category.category_name", read_only=True
+    )
 
-#     class Meta:
-#         model = PickupLine
-#         fields = ["id", "pickup_line", "category", "category_name", "tags", "rating"]
+    class Meta:
+        model = PickupLine
+        fields = ["id", "pickup_line", "category", "category_name", "tags", "rating"]
 
-#     def get_rating(self, obj):
-#         user = self.context["request"].user
-#         rating = Rating.objects.filter(user=user, pickup_line=obj).first()
-#         return rating.rating if rating else None
+    def get_rating(self, obj):
+        user = self.context["request"].user
+        rating = Rating.objects.filter(user=user, pickup_line=obj)
+        return rating.rating if rating else None
 
-#     def get_category_name(self, obj):
-#         return obj.category.category_name
+    def get_category_name(self, obj):
+        return obj.category.category_name
