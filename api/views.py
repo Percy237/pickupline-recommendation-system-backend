@@ -1,5 +1,5 @@
-from django.shortcuts import render
 from random import shuffle
+from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -87,11 +87,16 @@ class RatingListCreate(generics.ListCreateAPIView):
 
 
 class PickupLineListWithRatings(APIView):
+    pagination_class = PageNumberPagination
+
     def get(self, request):
         user = request.user
         pickup_lines = PickupLine.objects.all()
-        serialized_pickup_lines = []
 
+        paginator = self.pagination_class()
+        pickup_lines = paginator.paginate_queryset(pickup_lines, request)
+
+        serialized_pickup_lines = []
         for pickup_line in pickup_lines:
             ratings = Rating.objects.filter(user=user, pickup_line=pickup_line)
             serialized_ratings = [
@@ -102,4 +107,6 @@ class PickupLineListWithRatings(APIView):
             serialized_pickup_lines.append(pickup_line_data)
             shuffle(serialized_pickup_lines)
 
-        return Response(serialized_pickup_lines, status=status.HTTP_200_OK)
+        return paginator.get_paginated_response(
+            serialized_pickup_lines,
+        )

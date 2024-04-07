@@ -35,3 +35,7 @@ class Rating(models.Model):
     pickup_line = models.ForeignKey(PickupLine, on_delete=models.CASCADE)
     rating = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def user_id(self):
+        return self.user.id
