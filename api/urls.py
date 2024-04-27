@@ -2,7 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("profile/", views.UserCategoryListCreate.as_view(), name="user-profile"),
     path("users/all/", views.ListUsersView.as_view(), name="list-users"),
     path(
         "categories/", views.CategoryListCreate.as_view(), name="category-list-create"
@@ -23,6 +22,7 @@ urlpatterns = [
         name="pickup-line-list-create",
     ),
     path("ratings/", views.RatingListCreate.as_view(), name="rating-list-create"),
+    path("userprofile/", views.UserProfileListCreate.as_view(), name="userprofile"),
 ]
 
 #    path(

@@ -1,14 +1,13 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Category, UserCategory, PickupLine, Rating
+from .models import Category, PickupLine, Rating, UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source="id")
 
     class Meta:
         model = User
-        fields = ["user_id", "username", "password"]
+        fields = ["id", "username", "password"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
@@ -24,10 +23,22 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ["category_id", "category_name"]
 
 
-class UserCategorySerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
+    preferred_categories = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Category.objects.all(),
+        required=True,
+        allow_empty=False,
+    )
+
     class Meta:
-        model = UserCategory
-        fields = ["user", "preferred_categories"]
+        model = UserProfile
+        fields = ["id", "preferred_categories", "preferences_set"]
+
+    def validate_preferred_categories(self, value):
+        if not value:
+            raise serializers.ValidationError("You must select at least one category.")
+        return value
 
 
 class PickupLineSerializer(serializers.ModelSerializer):

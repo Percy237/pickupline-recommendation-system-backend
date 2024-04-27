@@ -9,12 +9,21 @@ class Category(models.Model):
         return self.category_name
 
 
-class UserCategory(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    preferred_categories = models.ForeignKey(Category, on_delete=models.CASCADE)
+# class UserCategory(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     preferred_categories = models.ForeignKey(Category, on_delete=models.CASCADE)
 
-    class Meta:
-        unique_together = ("user", "preferred_categories")
+#     class Meta:
+#         unique_together = ("user", "preferred_categories")
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    preferred_categories = models.ManyToManyField(Category)
+    preferences_set = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
 
 
 class PickupLine(models.Model):

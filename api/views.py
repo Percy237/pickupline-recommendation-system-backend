@@ -3,31 +3,28 @@ from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from .serializers import (
     UserSerializer,
-    UserCategorySerializer,
     CategorySerializer,
     PickupLineSerializer,
     RatingSerializer,
+    UserProfileSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import UserCategory, Category, PickupLine, Rating
+from .models import Category, PickupLine, Rating, UserProfile
 
 
-class UserCategoryListCreate(generics.ListCreateAPIView):
-    serializer_class = UserCategorySerializer
+class UserProfileListCreate(generics.ListCreateAPIView):
+    serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        return UserCategory.objects.filter(user=user)
+        return UserProfile.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        if serializer.is_valid():
-            serializer.save(user=self.request.user)
-        else:
-            print(serializer.errors)
+        serializer.save(user=self.request.user, preferences_set=True)
 
 
 class CategoryListCreate(generics.ListCreateAPIView):
@@ -78,22 +75,23 @@ class RatingListCreate(generics.ListCreateAPIView):
             existing_rating.rating = rating_value
             existing_rating.save()
             serializer = RatingSerializer(existing_rating)
-            # User has already rated this pickup line, return a 403 response
         else:
             serializer = RatingSerializer(data=self.request.data)
-            if serializer.is_valid():  # Check if the serializer is valid
+            if serializer.is_valid():
                 serializer.save(user=user)
             else:
-                # Handle the case where serializer is not valid
-                # You can return an error response or perform other actions
                 print("Serializer is not valid:", serializer.errors)
 
 
 class PickupLineListWithRatings(APIView):
     def get(self, request):
         user = request.user
-        pickup_lines = PickupLine.objects.all()
+        user_profile = get_object_or_404(UserProfile, user=user)
+        preferred_categories = user_profile.preferred_categories.all()
 
+        pickup_lines = PickupLine.objects.filter(
+            category__in=preferred_categories
+        ).order_by("?")
         # Apply pagination
         paginator = PageNumberPagination()
         paginator.page_size = 10  # Set the number of items per page
