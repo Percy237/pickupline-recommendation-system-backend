@@ -4,9 +4,11 @@ from .models import Category, UserCategory, PickupLine, Rating
 
 
 class UserSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="id")
+
     class Meta:
         model = User
-        fields = ["id", "username", "password"]
+        fields = ["user_id", "username", "password"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
@@ -15,9 +17,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    category_id = serializers.IntegerField(source="id")
+
     class Meta:
         model = Category
-        fields = ["id", "category_name"]
+        fields = ["category_id", "category_name"]
 
 
 class UserCategorySerializer(serializers.ModelSerializer):
@@ -31,16 +35,17 @@ class PickupLineSerializer(serializers.ModelSerializer):
         source="category.category_name", read_only=True
     )
 
+    pickup_line_id = serializers.IntegerField(source="id")
+
     class Meta:
         model = PickupLine
-        fields = ["id", "pickup_line", "category_name", "tags"]
+        fields = ["pickup_line_id", "pickup_line", "category_name", "tags"]
 
         def get_category_name(self, obj):
             return obj.category.category_name
 
 
 class RatingSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source="user.id", read_only=True)
 
     class Meta:
         model = Rating

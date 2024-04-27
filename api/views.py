@@ -46,6 +46,11 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
+class ListUsersView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
 class PickupLineListCreate(generics.ListCreateAPIView):
     queryset = PickupLine.objects.all()
     serializer_class = PickupLineSerializer
@@ -60,17 +65,15 @@ class RatingListCreate(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Rating.objects.filter(user=user)
+        return Rating.objects.all()
 
     def perform_create(self, serializer):
         user = self.request.user
         pickup_line_id = serializer.validated_data["pickup_line"]
         rating_value = serializer.validated_data["rating"]
-        print(rating_value)
         existing_rating = Rating.objects.filter(
             user=user, pickup_line_id=pickup_line_id
         ).first()
-        print(existing_rating)
         if existing_rating:
             existing_rating.rating = rating_value
             existing_rating.save()
@@ -87,13 +90,13 @@ class RatingListCreate(generics.ListCreateAPIView):
 
 
 class PickupLineListWithRatings(APIView):
-    pagination_class = PageNumberPagination
-
     def get(self, request):
         user = request.user
         pickup_lines = PickupLine.objects.all()
 
-        paginator = self.pagination_class()
+        # Apply pagination
+        paginator = PageNumberPagination()
+        paginator.page_size = 10  # Set the number of items per page
         pickup_lines = paginator.paginate_queryset(pickup_lines, request)
 
         serialized_pickup_lines = []
@@ -105,8 +108,5 @@ class PickupLineListWithRatings(APIView):
             pickup_line_data = PickupLineSerializer(pickup_line).data
             pickup_line_data["ratings"] = serialized_ratings
             serialized_pickup_lines.append(pickup_line_data)
-            shuffle(serialized_pickup_lines)
 
-        return paginator.get_paginated_response(
-            serialized_pickup_lines,
-        )
+        return paginator.get_paginated_response(serialized_pickup_lines)

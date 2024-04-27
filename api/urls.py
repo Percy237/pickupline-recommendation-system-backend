@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path("profile/", views.UserCategoryListCreate.as_view(), name="user-profile"),
+    path("users/all/", views.ListUsersView.as_view(), name="list-users"),
     path(
         "categories/", views.CategoryListCreate.as_view(), name="category-list-create"
     ),
